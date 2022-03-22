@@ -85,6 +85,8 @@ app.post('/edit/:id', (req, res, next) => {
 
   const todo = todos.find((todo) => todo.id === id)
 
+  if (!todo) return next()
+
   todo.text = text
 
   res.redirect('back')
