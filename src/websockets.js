@@ -34,7 +34,7 @@ export const sendTodoDetailToAllConnections = async (todoId) => {
   const todo = await getTodo(todoId)
 
   const html = await ejs.renderFile('views/_todo.ejs', {todo})
-  const jsonData = JSON.stringify({type: 'todoDetail', html});
+  const jsonData = JSON.stringify({type: 'todoDetail', html, todoId});
 
   for (const connection of connections) {
     connection.send(jsonData)

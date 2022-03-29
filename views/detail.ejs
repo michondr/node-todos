@@ -29,7 +29,7 @@
       ws.addEventListener('message', (message) => {
         const messageData = JSON.parse(message.data)
 
-        if (messageData.type === 'todoDetail') {
+        if (messageData.type === 'todoDetail' && messageData.todoId === Number(document.getElementById('currentTodoId').innerText)) {
           document.getElementById('todoDetail').innerHTML = messageData.html;
         }
 
