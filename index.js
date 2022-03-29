@@ -1,11 +1,15 @@
 import express from 'express'
-import knex from "knex";
-import knexfile from "./knexfile.js";
+import db from "./src/db.js"
+import {
+  createWebsocketServer,
+  sendTodoDeletedToAllConnections,
+  sendTodoDetailToAllConnections,
+  sendTodosToAllConnections,
+} from "./src/websockets.js";
 
 const port = 3000
 
 const app = express()
-const db = knex(knexfile)
 
 app.set('view engine', 'ejs')
 
@@ -33,6 +37,7 @@ app.get('/', async (req, res) => {
 app.post('/add', async (req, res) => {
   await db('todos').insert({text: String(req.body.text)})
 
+  await sendTodosToAllConnections()
   res.redirect('/')
 })
 
@@ -48,6 +53,8 @@ app.get('/toggle/:id', async (req, res, next) => {
 
   await db('todos').where('id', id).update({done: !todo.done})
 
+  await sendTodoDetailToAllConnections(id)
+  await sendTodosToAllConnections()
   res.redirect('back')
 })
 
@@ -58,6 +65,8 @@ app.get('/delete/:id', async (req, res, next) => {
     .delete()
     .where('id', id)
 
+  await sendTodoDeletedToAllConnections(id)
+  await sendTodosToAllConnections()
   res.redirect('/')
 })
 
@@ -89,6 +98,8 @@ app.post('/edit/:id', async (req, res, next) => {
 
   await db('todos').where('id', id).update({text: text})
 
+  await sendTodoDetailToAllConnections(id)
+  await sendTodosToAllConnections()
   res.redirect('back')
 })
 
@@ -98,6 +109,8 @@ app.use((req, res) => {
   res.render('404')
 })
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`)
 })
+
+createWebsocketServer(server)

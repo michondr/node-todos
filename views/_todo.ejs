@@ -1,0 +1,11 @@
+<h1><%= todo.text %></h1>
+<h2><%= todo.done ? 'Hotovo' : 'Nehotovo' %></h2>
+
+<hr />
+
+<% if (todo.done) { %>
+    <a href="/toggle/<%= todo.id %>">Nehotovo</a>
+    <a href="/delete/<%= todo.id %>">Odstranit</a>
+<% } else { %>
+    <a href="/toggle/<%= todo.id %>">Hotovo</a>
+<% } %>

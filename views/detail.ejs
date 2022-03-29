@@ -7,21 +7,14 @@
     <title><%= todo.text %></title>
   </head>
   <body>
+    <span id="currentTodoId" style="display: none"><%= todo.id %></span>
     <a href="/">Seznam výpis</a>
 
     <hr />
 
-    <h1><%= todo.text %></h1>
-    <h2><%= todo.done ? 'Hotovo' : 'Nehotovo' %></h2>
-
-    <hr />
-
-    <% if (todo.done) { %>
-    <a href="/toggle/<%= todo.id %>">Nehotovo</a>
-    <a href="/delete/<%= todo.id %>">Odstranit</a>
-    <% } else { %>
-    <a href="/toggle/<%= todo.id %>">Hotovo</a>
-    <% } %>
+    <div id="todoDetail">
+        <%- include('_todo.ejs') %>
+    </div>
 
     <hr />
 
@@ -29,5 +22,21 @@
       <input type="text" name="text" value="<%= todo.text %>" />
       <button type="submit">Upravit ToDo!</button>
     </form>
+
+    <script>
+      const ws = new WebSocket('ws://localhost:3000');
+
+      ws.addEventListener('message', (message) => {
+        const messageData = JSON.parse(message.data)
+
+        if (messageData.type === 'todoDetail') {
+          document.getElementById('todoDetail').innerHTML = messageData.html;
+        }
+
+        if(messageData.type === 'todoDeleted' && messageData.todoId === Number(document.getElementById('currentTodoId').innerText)){
+          window.location = '/'
+        }
+      });
+    </script>
   </body>
 </html>
