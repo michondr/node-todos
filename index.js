@@ -13,7 +13,16 @@ app.use(express.static('public'))
 app.use(express.urlencoded({extended: true}))
 
 app.get('/', async (req, res) => {
-  const todos = await db('todos').select('*');
+
+  let todos = null;
+
+  if(req.query.done === 'true'){
+    todos = await db('todos').select('*').where('done', true);
+  } else if(req.query.done === 'false'){
+    todos = await db('todos').select('*').where('done', false);
+  } else {
+    todos = await db('todos').select('*');
+  }
 
   res.render('index', {
     title: 'ToDos!',
