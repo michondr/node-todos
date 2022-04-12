@@ -1,10 +1,7 @@
 import express from 'express'
-import db from "../src/db.js"
-import {
-  sendTodoDeletedToAllConnections,
-  sendTodoDetailToAllConnections,
-  sendTodosToAllConnections,
-} from "./websockets.js";
+import db, { createUser, getAllTodos, getUser, getUserByToken } from "../src/db.js"
+import { sendTodoDeletedToAllConnections, sendTodoDetailToAllConnections, sendTodosToAllConnections } from "./websockets.js";
+import cookieParser from "cookie-parser";
 
 export const app = express()
 
@@ -12,17 +9,30 @@ app.set('view engine', 'ejs')
 
 app.use(express.static('public'))
 app.use(express.urlencoded({extended: true}))
+app.use(cookieParser())
+
+app.use(async (req, res, next) => {
+  const token = req.cookies.token
+
+  if (token) {
+    res.locals.user = await getUserByToken(token)
+  } else {
+    res.locals.user = null
+  }
+
+  next()
+})
 
 app.get('/', async (req, res) => {
 
   let todos = null;
 
-  if(req.query.done === 'true'){
+  if (req.query.done === 'true') {
     todos = await db('todos').select('*').where('done', true);
-  } else if(req.query.done === 'false'){
+  } else if (req.query.done === 'false') {
     todos = await db('todos').select('*').where('done', false);
   } else {
-    todos = await db('todos').select('*');
+    todos = await getAllTodos();
   }
 
   res.render('index', {
@@ -98,6 +108,50 @@ app.post('/edit/:id', async (req, res, next) => {
   await sendTodoDetailToAllConnections(id)
   await sendTodosToAllConnections()
   res.redirect('back')
+})
+
+app.get('/logout', async (req, res) => {
+  res.cookie('token', null)
+
+  res.redirect('/')
+})
+
+app.get('/register', async (req, res) => {
+  res.render('register')
+})
+
+app.post('/register', async (req, res) => {
+  const name = req.body.name
+  const password = req.body.password
+
+  try {
+    const user = await createUser(name, password)
+    res.cookie('token', user.token)
+    res.redirect('/')
+  } catch (e) {
+    if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      res.redirect('/register')
+    }
+  }
+
+})
+
+app.get('/login', async (req, res) => {
+  res.render('login')
+})
+
+app.post('/login', async (req, res) => {
+  const name = req.body.name
+  const password = req.body.password
+
+  const user = await getUser(name, password)
+
+  if (user) {
+    res.cookie('token', user.token)
+    res.redirect('/')
+  } else {
+    res.redirect('/login')
+  }
 })
 
 app.use((req, res) => {

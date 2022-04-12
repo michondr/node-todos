@@ -3,10 +3,12 @@
  * @returns { Promise<void> }
  */
 export const up = async function (knex) {
-  await knex.schema.createTable('todos', (table) => {
+  await knex.schema.createTable('users', (table) => {
     table.increments('id')
-    table.string('text').notNullable()
-    table.boolean('done').notNullable().defaultTo(false)
+    table.string('name').notNullable().unique()
+    table.string('salt').notNullable()
+    table.string('hash').notNullable()
+    table.string('token')
   })
 };
 
@@ -15,5 +17,5 @@ export const up = async function (knex) {
  * @returns { Promise<void> }
  */
 export const down = async function (knex) {
-  await knex.schema.dropTable('todos')
+  await knex.schema.dropTable('users')
 };

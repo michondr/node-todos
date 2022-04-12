@@ -9,6 +9,15 @@
 <body>
 <h1><%= title %></h1>
 
+<% if (user) { %>
+    <%= user.name %>
+    <a href="/logout">Logout</a>
+<% } else { %>
+    <a href="/login">Login</a>
+    <a href="/register">Registrace</a>
+<% } %>
+
+<hr />
 <a href="?done=true">Hotové</a>
 <a href="?done=false">Nehotové</a>
 <a href="?">Všechny</a>

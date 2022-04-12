@@ -21,6 +21,7 @@
   "homepage": "https://github.com/adamjedlicka/node-todos#readme",
   "dependencies": {
     "@vscode/sqlite3": "^5.0.8",
+    "cookie-parser": "^1.4.6",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
     "knex": "^1.0.4",
