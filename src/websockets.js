@@ -1,6 +1,6 @@
 import ejs from 'ejs'
 import { WebSocketServer } from "ws";
-import { getAllTodos, getTodo } from "./db.js";
+import { getAllTodos, getTodo } from "./db/todos.js";
 
 /** @type {Set<WebSocket>} */
 const connections = new Set()
